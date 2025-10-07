@@ -51,7 +51,18 @@ object scalaApp {
       noUsersFound()
       List()
     } else {
-      database.filter(_.deleted == false).foreach(user => println(s"ID: ${user.id}, Name: ${user.name}, Age: ${user.age}, deleted: ${user.deleted}"))
+      database.filter(_.deleted == false).foreach(user => println(s"ID: ${user.id}, Name: ${user.name}, Age: ${user.age}"))
+      database
+    }
+  }
+
+  // YOU ARE NOT SUPPOSED TO USE THE FOLLOWING FUNCTION
+  def listAllUsers(): List[User] = {
+    if (database.isEmpty) {
+      noUsersFound()
+      List()
+    } else {
+      database.foreach(user => println(s"ID: ${user.id}, Name: ${user.name}, Age: ${user.age}, deleted: ${user.deleted}"))
       database
     }
   }
@@ -66,12 +77,12 @@ object scalaApp {
     database
   }
   def deleteUser(id: Int): List[User] = {
-    val initialSize = database.size
-    database = database.map(user => if (user.id == id & !user.deleted) user.copy(deleted = true) else user)
-    if (database.size < initialSize)
-      userWithIDAction(id, "deleted")
-    else {
-      noUsersFoundWithID(id)
+    database.filter(_.deleted == false).find(_.id == id) match {
+      case Some(_) =>
+        database = database.map(user => if (user.id == id & !user.deleted) user.copy(deleted = true) else user)
+        userWithIDAction(id, "\"deleted\"")
+      case None =>
+        noUsersFoundWithID(id)
     }
     database
   }
@@ -106,6 +117,11 @@ object scalaApp {
         case "5" =>
           running = false
           println("Exiting the application.")
+
+        case "listAllUsers1234" =>
+          println("WARNING: THIS FUNCTION IS ONLY FOR LOGGING PURPOSES!")
+          listAllUsers()
+
         case _ =>
           println("Invalid option. Please choose a number between 1 and 5")
       }
