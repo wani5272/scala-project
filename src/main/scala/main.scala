@@ -51,4 +51,40 @@ object scalaApp {
     }
     database
   }
+  def main(args: Array[String]): Unit = {
+    var running = true
+    while (running) {
+      println("\n=== In-Memory Database Menu ===")
+      println("1. Add User")
+      println("2. List Users")
+      println("3. Update User")
+      println("4. Delete User")
+      println("5. Exit")
+
+      readInput("Choose an option (1-5):") match {
+        case "1" =>
+          val name = readInput("Enter user name:")
+          val age = readInput("Enter user age:").toInt
+          addUser(name, age)
+
+        case "2" =>
+          listUsers()
+
+        case "3" =>
+          val id = readInput("Enter user ID to update:").toInt
+          val name = readInput("Enter new user name:")
+          val age = readInput("Enter new user age:").toInt
+          updateUser(id, name, age)
+
+        case "4" =>
+          val id = readInput("Enter user ID to delete:").toInt
+          deleteUser(id)
+        case "5" =>
+          running = false
+          println("Exiting the application.")
+        case _ =>
+          println("Invalid option. Please choose a number between 1 and 5")
+      }
+    }
+  }
 }
