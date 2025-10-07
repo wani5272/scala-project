@@ -1,6 +1,6 @@
 import scala.io.StdIn
 
-case class User(id: Int, name: String, age: Int)
+case class User(id: Int, name: String, age: Int, deleted: Boolean)
 
 object scalaApp {
   // TODO: make immutable
@@ -17,23 +17,23 @@ object scalaApp {
     // determines the next ID, if empty
     val nextId = if (database.isEmpty) 1 else database.map(_.id).max + 1
     // TODO: this line is dangerous: replacing the database with its new state. make immutable
-    database = database :+ User(nextId, name, age)
+    database = database :+ User(nextId, name, age, false)
     database
   }
 
   def listUsers(): List[User] = {
-    if (database.isEmpty) {
+    if (!database.exists(_.deleted == false)) {
       println("No users found.")
       List()
     } else {
-      database.foreach(user => println(s"ID: ${user.id}, Name: ${user.name}, Age: ${user.age}"))
+      database.filter(_.deleted == false).foreach(user => println(s"ID: ${user.id}, Name: ${user.name}, Age: ${user.age}, deleted: ${user.deleted}"))
       database
     }
   }
   def updateUser(id: Int, name: String, age: Int): List[User] = {
-    database.find(_.id == id) match {
+    database.filter(_.deleted == false).find(_.id == id) match {
       case Some(_) =>
-        database = database.map(user => if (user.id == id) user.copy(name = name, age = age) else user)
+        database = database.map(user => if (user.id == id & !user.deleted) user.copy(name = name, age = age, deleted = false) else user)
         println(s"User with ID $id updated")
       case None =>
         println(s"No user found with ID $id.")
@@ -42,7 +42,7 @@ object scalaApp {
   }
   def deleteUser(id: Int): List[User] = {
     val initialSize = database.size
-    database = database.filterNot(_.id == id)
+    database = database.map(user => if (user.id == id & !user.deleted) user.copy(deleted = true) else user)
     if (database.size < initialSize)
       // TODO: Repetition? output should be in seperate functions (or main)
       println(s"User with ID $id deleted.")
